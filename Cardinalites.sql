@@ -17,7 +17,7 @@ IF OBJECT_ID(N'dbo.Stock', N'U') IS NOT NULL
 GO
 CREATE TABLE Products (Product_Id INT PRIMARY KEY IDENTITY (1, 1),Product_Name nchar(150) , Product_Price numeric(18,2), Product_Category nchar(150));
 Create Table Sells(Sell_Id INT PRIMARY KEY IDENTITY (1, 1), Product_Id INT FOREIGN KEY REFERENCES Products(Product_Id), Sell_Date datetime, Sell_Quantity numeric(1,0));
-CREATE TABLE Stock (Id INT PRIMARY KEY IDENTITY (1, 1),Product_Id INT FOREIGN KEY REFERENCES Products(Product_Id), Quantity numeric(1,0));
+CREATE TABLE Stock (Id INT PRIMARY KEY IDENTITY (1, 1),Product_Id INT FOREIGN KEY REFERENCES Products(Product_Id), Quantity numeric(2,0));
 
 
 
@@ -49,11 +49,17 @@ INSERT INTO Sells(Product_Id,Sell_Date,Sell_Quantity) VALUES(6,GETDATE(),3);
 INSERT INTO Sells(Product_Id,Sell_Date,Sell_Quantity) VALUES(7,GETDATE(),1);
 INSERT INTO Sells(Product_Id,Sell_Date,Sell_Quantity) VALUES(8,GETDATE(),2);
 INSERT INTO Sells(Product_Id,Sell_Date,Sell_Quantity) VALUES(9,GETDATE(),1);
-SELECT *
-FROM (
-  SELECT Products.Product_Id, Sell_Quantity, Products.Product_Category, Products.Product_Name
-  FROM Sells INNER JOIN Products ON Products.Product_Id = Sells.Product_Id WHERE Product_Category='Memory'
-) t
-PIVOT (
-  SUM(Sell_Quantity) FOR Product_Id IN ([4], [5], [6])
-) AS p
+
+INSERT INTO Stock (Product_Id,Quantity) VALUES (1,10);
+INSERT INTO Stock (Product_Id,Quantity) VALUES (2,10);
+INSERT INTO Stock (Product_Id,Quantity) VALUES (3,10);
+INSERT INTO Stock (Product_Id,Quantity) VALUES (4,10);
+INSERT INTO Stock (Product_Id,Quantity) VALUES (5,10);
+INSERT INTO Stock (Product_Id,Quantity) VALUES (6,10);
+INSERT INTO Stock (Product_Id,Quantity) VALUES (7,10);
+INSERT INTO Stock (Product_Id,Quantity) VALUES (8,10);
+INSERT INTO Stock (Product_Id,Quantity) VALUES (9,10);
+
+(SELECT Products.Product_Id, Stock.Quantity - SUM(Sell_Quantity) as Remaining, Products.Product_Category, Products.Product_Name
+  FROM Products JOIN Sells ON Products.Product_Id = Sells.Product_Id 
+  JOIN Stock ON Stock.Product_Id=Products.Product_Id WHERE Product_Category='Memory' GROUP BY Products.Product_Id,Products.Product_Category,Products.Product_Name,Stock.Quantity)  
